@@ -1,5 +1,5 @@
 import type { Actions } from "./$types";
-import { fail } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import { message, setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { schema } from "./schema";
@@ -37,6 +37,8 @@ export const actions: Actions = {
         let token = jwt.sign(form.data.username, JWT_SECRET);
 
         event.cookies.set("token", token, { path: "/" });
+
+        redirect(302, "/");
 
         return { form };
     },

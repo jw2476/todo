@@ -9,6 +9,7 @@
 	import Pencil from 'svelte-radix/Pencil2.svelte';
 	import Plus from 'svelte-radix/Plus.svelte';
 	import { writable } from 'svelte/store';
+	import Nav from '$lib/components/Nav.svelte';
 
 	export let data;
 	let tasks = writable(data.tasks);
@@ -84,6 +85,7 @@
 	}
 </script>
 
+<Nav />
 <Card.Root class="m-16 px-16 pb-16 pt-4">
 	<Card.Header>
 		<Card.Title class="cols-span-9 text-center text-5xl">Tasks</Card.Title>

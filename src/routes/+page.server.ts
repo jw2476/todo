@@ -1,11 +1,11 @@
 import { generateSchedule } from '$lib/schedule.js';
 import { getTasks, getUser } from '$lib/tasks.js';
-import { error } from '@sveltejs/kit';
+import { error, redirect } from '@sveltejs/kit';
 
 export async function load({ cookies }) {
     const token = cookies.get("token");
     if (token == null) {
-        return error(401);
+        return redirect(302, "/login");
     }
 
     const user = await getUser(token);

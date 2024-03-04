@@ -1,5 +1,5 @@
 import type { Actions } from "./$types";
-import { fail } from "@sveltejs/kit";
+import { fail, redirect } from "@sveltejs/kit";
 import { message, setError, superValidate } from "sveltekit-superforms";
 import { zod } from "sveltekit-superforms/adapters";
 import { schema } from "./schema";
@@ -11,6 +11,11 @@ import { JWT_SECRET } from "$env/static/private";
 import { eq } from "drizzle-orm";
 
 const SALT_ROUNDS = 10;
+
+export async function load() {
+   const form = await superValidate(zod(schema));
+   return { form }; 
+}
 
 export const actions: Actions = {
     default: async (event) => {
@@ -33,6 +38,8 @@ export const actions: Actions = {
         let token = jwt.sign(form.data.username, JWT_SECRET);
 
         event.cookies.set("token", token, { path: "/" });
+
+        redirect(302, "/");
 
         return { form };
     },

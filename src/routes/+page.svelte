@@ -7,6 +7,7 @@
 	import { formatDuration } from '$lib/date';
 	import { invalidateAll } from '$app/navigation';
 	import NumericInput from '$lib/components/NumericInput.svelte';
+	import Nav from '$lib/components/Nav.svelte';
 
 	export let data;
 	let schedule: Array<ScheduledTask> = data.tasks;
@@ -67,11 +68,12 @@
 
 	async function takeBreak() {
 		let duration = breakHours * 3600 + breakMinutes * 60;
-		let deadline = new Date(Date.now() + duration * 1000);
+        let startAfter = Date.now();
+		let deadline = Date.now() + duration * 1000;
 		let title = 'Break';
 		await fetch('/api/tasks', {
 			method: 'POST',
-			body: JSON.stringify({ duration, deadline, title })
+			body: JSON.stringify({ duration, deadline, startAfter, title })
 		});
         await sleep(500);
 		await invalidateAll();
@@ -94,6 +96,7 @@
     }
 </script>
 
+<Nav />
 <div class="p-8 md:p-16 lg:mx-[15vw] lg:grid lg:grid-cols-3 lg:gap-4">
 	<div class="flex flex-col items-stretch gap-4 lg:col-span-2">
 		{#if current}
