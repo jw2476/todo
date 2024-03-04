@@ -38,7 +38,7 @@
 
 	function setNext() {
 		next = schedule
-			.filter((task) => task.scheduled && task.id != current.id)
+			.filter((task) => task.scheduled && (current ? task.id != current.id : true))
 			.sort((a, b) => a.scheduled?.getTime() - b.scheduled?.getTime());
 		console.log(next);
 	}

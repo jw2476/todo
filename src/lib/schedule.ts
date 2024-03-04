@@ -34,6 +34,10 @@ export async function generateSchedule(user: User, tasks: Array<Task>) {
         if (day_end.getTime() < (start.getTime() + task.duration * 1000)) { // If the task would finish after the day's ended, move it to the beginning of the next day
             start = next_day;
         }
+        
+        if (start.getTime() < task.startAfter.getTime()) {
+            start = task.startAfter;
+        }
 
         task.scheduled = start; // Schedule in this task
         (async () => await db.update(schema.tasks).set({ scheduled: start }).where(eq(schema.tasks.id, task.id)))();

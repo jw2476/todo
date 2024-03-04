@@ -2,6 +2,9 @@ CREATE TABLE IF NOT EXISTS "tasks" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"title" text NOT NULL,
 	"duration" integer NOT NULL,
+	"scheduled" timestamp,
+	"repeat" integer,
+	"start_after" timestamp NOT NULL,
 	"deadline" timestamp with time zone NOT NULL,
 	"user_id" integer
 );

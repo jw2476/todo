@@ -27,8 +27,10 @@ export async function GET({ cookies }) {
 }
 
 export async function POST({ request, cookies }) {
-    let { deadline, duration, title, repeat } = await request.json();
+    let { deadline, duration, title, repeat, startAfter } = await request.json();
     let deadlineDate = new Date(deadline);
+    let startDate = new Date(startAfter);
+
     const token = cookies.get("token");
     if (token == null) {
         return error(401);
@@ -41,7 +43,14 @@ export async function POST({ request, cookies }) {
         return error(404);
     }
 
-    const task = await db.insert(tasks).values({ deadline: deadlineDate, duration, title, user_id: user.id, repeat }).returning({ id: tasks.id });
+    const task = await db.insert(tasks).values({
+        deadline: deadlineDate,
+        duration, 
+        title, 
+        user_id: user.id, 
+        repeat, 
+        startAfter: startDate
+    }).returning({ id: tasks.id });
 
 
     const taskList = await getTasks(user);
@@ -88,8 +97,9 @@ export async function DELETE({ request, cookies }) {
 }
 
 export async function PATCH({ request, cookies }) {
-    const { id, deadline, duration, title, repeat } = await request.json();
+    const { id, deadline, duration, title, repeat, startAfter } = await request.json();
     let deadlineDate = new Date(deadline);
+    let startDate = new Date(startAfter);
 
     const token = cookies.get("token");
     if (token == null) {
@@ -112,7 +122,7 @@ export async function PATCH({ request, cookies }) {
         return error(401);
     }
 
-    await db.update(tasks).set({ deadline: deadlineDate, duration, title, repeat }).where(eq(tasks.id, id));
+    await db.update(tasks).set({ deadline: deadlineDate, duration, title, repeat, startAfter: startDate }).where(eq(tasks.id, id));
 
     const taskList = await getTasks(user);
     if (typeof taskList === "number") {

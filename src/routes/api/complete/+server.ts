@@ -31,7 +31,10 @@ export async function POST({ request, cookies }) {
     }
 
     if (task.repeat) {
-        await db.update(tasks).set({ deadline: new Date(task.deadline.getTime() + task.repeat * (24 * 3600 * 1000)) }).where(eq(tasks.id, task.id));
+        await db.update(tasks).set({ 
+            startAfter: new Date(task.startAfter.getTime() + task.repeat * (24 * 3600 * 1000)),
+            deadline: new Date(task.deadline.getTime() + task.repeat * (24 * 3600 * 1000)) 
+        }).where(eq(tasks.id, task.id));
     } else {
         await db.delete(tasks).where(eq(tasks.id, task.id));
     }

@@ -5,22 +5,8 @@
     {
       "idx": 0,
       "version": "5",
-      "when": 1709476898764,
-      "tag": "0000_pale_namora",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "5",
-      "when": 1709564204779,
-      "tag": "0001_youthful_virginia_dare",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "5",
-      "when": 1709567478715,
-      "tag": "0002_whole_rick_jones",
+      "when": 1709568522969,
+      "tag": "0000_slow_pestilence",
       "breakpoints": true
     }
   ]

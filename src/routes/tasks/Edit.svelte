@@ -15,6 +15,7 @@
 	let title: string;
 	let hours: number, minutes: number;
 	let deadlineDate: DateValue, deadlineHours: number, deadlineMinutes: number;
+    let startDate: DateValue, startHours: number, startMinutes: number;
 	let open: boolean = false;
 	let issues: string[] = [];
 	let repeat: number = 0;
@@ -26,6 +27,9 @@
 		deadlineDate = fromDate(task.deadline, 'Europe/London');
 		deadlineHours = task.deadline.getHours();
 		deadlineMinutes = task.deadline.getMinutes();
+        startDate = fromDate(task.startAfter, 'Europe/London');
+		startHours = task.startAfter.getHours();
+		startMinutes = task.startAfter.getMinutes();
 		repeat = task.repeat ? task.repeat : 0;
 	}
 
@@ -36,6 +40,9 @@
 			deadlineHours: z.number().min(0),
 			deadlineMinutes: z.number().min(0).max(60),
 			deadlineDate: z.date(),
+            startHours: z.number().min(0),
+			startMinutes: z.number().min(0).max(60),
+			startDate: z.date(),
 			title: z.string().min(1),
 			repeat: z.number().min(0)
 		});
@@ -46,6 +53,9 @@
 			deadlineHours,
 			deadlineMinutes,
 			deadlineDate: deadlineDate.toDate('Europe/London'),
+            startHours,
+			startMinutes,
+			startDate: startDate.toDate('Europe/London'),
 			title,
 			repeat
 		});
@@ -59,10 +69,14 @@
 		let deadline = deadlineDate.toDate('Europe/London');
 		deadline.setHours(deadlineHours);
 		deadline.setMinutes(deadlineMinutes);
+        let startAfter = startDate.toDate('Europe/London');
+		startAfter.setHours(startHours);
+		startAfter.setMinutes(startMinutes);
 		task = {
 			title,
 			duration,
 			deadline,
+            startAfter,
 			repeat: repeat == 0 ? null : repeat,
 			id: task.id,
 			scheduled: null
@@ -89,6 +103,15 @@
 				<Label for="duration" class="text-right">Duration</Label>
 				<NumericInput bind:value={hours} class="col-span-2" />
 				<NumericInput bind:value={minutes} class="col-span-2" />
+			</div>
+            <div class="grid grid-cols-5 items-center gap-4">
+				<Label for="duration" class="text-right">Start After</Label>
+				<DatePicker bind:value={startDate} class="col-span-4" />
+			</div>
+			<div class="grid grid-cols-5 items-center gap-4">
+				<p />
+				<NumericInput bind:value={startHours} class="col-span-2" />
+				<NumericInput bind:value={startMinutes} class="col-span-2" />
 			</div>
 			<div class="grid grid-cols-5 items-center gap-4">
 				<Label for="duration" class="text-right">Deadline</Label>
