@@ -6,18 +6,18 @@
 	import { onMount } from 'svelte';
 	import { formatDuration } from '$lib/date';
 	import { invalidateAll } from '$app/navigation';
-    import NumericInput from "$lib/components/NumericInput.svelte";
+	import NumericInput from '$lib/components/NumericInput.svelte';
 
 	export let data;
 	let schedule: Array<ScheduledTask> = data.tasks;
 	$: schedule = data.tasks;
 	let current: ScheduledTask | undefined;
 	let next: Array<ScheduledTask> = [];
-        let breakHours: number = 0;
-        let breakMinutes: number = 0;
+	let breakHours: number = 0;
+	let breakMinutes: number = 0;
 
-    setCurrent();
-    setNext();
+	setCurrent();
+	setNext();
 
 	onMount(() => {
 		setInterval(setCurrent, 1000);
@@ -38,31 +38,44 @@
 
 	function setNext() {
 		next = schedule
-			.filter(task => task.scheduled && task.scheduled.getTime() > Date.now())
+			.filter((task) => task.scheduled && task.id != current.id)
 			.sort((a, b) => a.scheduled?.getTime() - b.scheduled?.getTime());
 		console.log(next);
 	}
 
 	function timeUntil(task: ScheduledTask): string {
-        if (task.scheduled === null) { return "Unscheduled"; }
-        let between = task.scheduled.getTime() - Date.now();
-		return formatDuration(between / 1000);
+		if (task.scheduled === null) {
+			return 'Unscheduled';
+		}
+		if (task.scheduled.getTime() < Date.now()) {
+			return 'Overdue';
+		}
+		let between = task.scheduled.getTime() - Date.now();
+		return `Next in ${formatDuration(between / 1000)}`;
 	}
 
 	async function complete() {
 		if (current == undefined) return;
-		await fetch('/api/tasks', { method: 'DELETE', body: JSON.stringify({ id: current.id }) });
+		await fetch('/api/complete', { method: 'POST', body: JSON.stringify({ id: current.id }) });
+        await sleep(500);
 		await invalidateAll();
 	}
 
-    async function takeBreak() {
-        let duration = breakHours * 3600 + breakMinutes * 60;
-        let deadline = new Date(Date.now() + duration * 1000);
-        let title = "Break";
-        await fetch("/api/tasks", { method: "POST", body: JSON.stringify({ duration, deadline, title }) }); 
-        await invalidateAll();
+    function sleep(duration: number): Promise<void> {
+        return new Promise(res => setTimeout(res, duration));
     }
 
+	async function takeBreak() {
+		let duration = breakHours * 3600 + breakMinutes * 60;
+		let deadline = new Date(Date.now() + duration * 1000);
+		let title = 'Break';
+		await fetch('/api/tasks', {
+			method: 'POST',
+			body: JSON.stringify({ duration, deadline, title })
+		});
+        await sleep(500);
+		await invalidateAll();
+	}
 </script>
 
 <div class="p-8 md:p-16 lg:mx-[15vw] lg:grid lg:grid-cols-3 lg:gap-4">
@@ -82,7 +95,7 @@
 			<Button.Root class="p-8 text-xl lg:p-16 lg:text-3xl">Snooze</Button.Root>
 		</div>
 		{#if next[0]}
-			<Task description={`Next in ${timeUntil(next[0])}`} task={next[0]} />
+			<Task description={timeUntil(next[0])} task={next[0]} />
 		{:else}
 			<Card.Root class="p-16">
 				<Card.Header>
@@ -90,15 +103,15 @@
 				</Card.Header>
 			</Card.Root>
 		{/if}
-        <Card.Root class="p-8 grid grid-cols-3 gap-4"> 
-            <NumericInput bind:value={breakHours} />
-            <NumericInput bind:value={breakMinutes} />
-            <Button.Root class="text-xl" on:click={takeBreak}>Take a break</Button.Root>
-        </Card.Root>
+		<Card.Root class="grid grid-cols-3 gap-4 p-8">
+			<NumericInput bind:value={breakHours} />
+			<NumericInput bind:value={breakMinutes} />
+			<Button.Root class="text-xl" on:click={takeBreak}>Take a break</Button.Root>
+		</Card.Root>
 	</div>
 	<div class="hidden grid-rows-4 gap-4 lg:grid">
-		{#each next.slice(1, 4) as task}
-        <Task description={`Next in ${timeUntil(task)}`} {task} />
+		{#each next.slice(1, 5) as task}
+			<Task description={timeUntil(task)} {task} />
 		{/each}
 	</div>
 </div>

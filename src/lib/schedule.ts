@@ -35,8 +35,6 @@ export async function generateSchedule(user: User, tasks: Array<Task>) {
             start = next_day;
         }
 
-        console.log(start);
-
         task.scheduled = start; // Schedule in this task
         (async () => await db.update(schema.tasks).set({ scheduled: start }).where(eq(schema.tasks.id, task.id)))();
         start = new Date(start.getTime() + task.duration * 1000); // Advance the start time by the task's duration

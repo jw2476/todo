@@ -3,5 +3,6 @@ export type Task = {
     title: string,
     scheduled: Date | null,
     duration: number,
-    deadline: Date
+    deadline: Date,
+    repeat: number | null
 };

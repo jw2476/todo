@@ -21,6 +21,7 @@ export const tasks = pgTable('tasks', {
     title: text('title').notNull(),
     duration: integer('duration').notNull(),
     scheduled: timestamp('scheduled'),
+    repeat: integer('repeat'),
     deadline: timestamp('deadline', { withTimezone: true }).notNull(),
     user_id: integer('user_id').references(() => users.id)
 });

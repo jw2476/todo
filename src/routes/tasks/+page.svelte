@@ -13,7 +13,7 @@
 	export let data;
 	let tasks = writable(data.tasks);
 
-	let staging: Task = { deadline: new Date(Date.now()), duration: 0, title: '', id: 0 };
+	let staging: Task = { deadline: new Date(Date.now()), duration: 0, title: '', id: 0, scheduled: null, repeat: 0 };
 
 	function duration(duration: number): string {
 		function pad(data: string): string {
@@ -52,13 +52,14 @@
 			deadline: task.deadline.getTime(),
 			duration: task.duration,
 			title: task.title,
-			id: task.id
+			id: task.id,
+            repeat: task.repeat
 		};
 		await fetch('/api/tasks', { method: 'PATCH', body: JSON.stringify(body) });
 	}
 
 	async function createTask(task: Task) {
-		const body = { deadline: task.deadline.getTime(), duration: task.duration, title: task.title };
+		const body = { deadline: task.deadline.getTime(), duration: task.duration, title: task.title, repeat: task.repeat };
 		let res = await fetch('/api/tasks', { method: 'POST', body: JSON.stringify(body) });
 		task.id = (await res.json()).id;
 		tasks.update((tasks) => {
@@ -83,6 +84,8 @@
 					<Table.Head class="text-center">Title</Table.Head>
 					<Table.Head class="text-center">Duration</Table.Head>
 					<Table.Head class="text-center">Deadline</Table.Head>
+                    <Table.Head class="text-center">Repeat</Table.Head>
+                    <Table.Head class="text-center">Scheduled</Table.Head>
 					<Table.Head class="px-8 text-right">Actions</Table.Head>
 				</Table.Row>
 			</Table.Header>
@@ -92,6 +95,9 @@
 						<Table.Cell class="text-center">{task.title}</Table.Cell>
 						<Table.Cell class="text-center">{duration(task.duration)}</Table.Cell>
 						<Table.Cell class="text-center">{deadline(task.deadline)}</Table.Cell>
+						<Table.Cell class="text-center">{task.repeat ? `${task.repeat?.toString()} days` : "-"}</Table.Cell>
+                        <Table.Cell class="text-center">{task.scheduled ? deadline(task.scheduled) : "-"}</Table.Cell>
+
 						<Table.Cell class="text-right">
 							<Edit callback={patchTask} dialogTitle="Edit task" bind:task>
 								<Pencil class="h-4 w-4" />

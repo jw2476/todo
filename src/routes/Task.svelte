@@ -7,15 +7,13 @@
     
     export let task: Task;
     export let description: string;
-    
-    function duration(): string {
-        return formatDuration(task.duration);
-    }
-
-    function deadline(): string {
+    let duration: string = "";
+    $: duration = formatDuration(task.duration)
+    let deadline: string = "";
+    $: deadline = (() =>  {
         const value = task.deadline;
         return `${value.getDate()}/${value.getMonth()}/${value.getFullYear()}`
-    }
+    })();
 </script>
 
 <Card.Root>
@@ -27,11 +25,11 @@
         <div class="flex grow justify-between">
             <div class="flex grow justify-start gap-2">
                 <Clock />
-                {duration()}
+                {duration}
             </div>
             <div class="flex grow justify-end gap-2">
                 <Calendar />
-                {deadline()}
+                {deadline}
             </div>
         </div>
     </Card.Footer>

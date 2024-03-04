@@ -17,6 +17,7 @@
 	let deadlineDate: DateValue, deadlineHours: number, deadlineMinutes: number;
 	let open: boolean = false;
 	let issues: string[] = [];
+	let repeat: number = 0;
 
 	function start() {
 		title = task.title;
@@ -25,7 +26,7 @@
 		deadlineDate = fromDate(task.deadline, 'Europe/London');
 		deadlineHours = task.deadline.getHours();
 		deadlineMinutes = task.deadline.getMinutes();
-		console.log(hours);
+		repeat = task.repeat ? task.repeat : 0;
 	}
 
 	async function submit() {
@@ -35,21 +36,37 @@
 			deadlineHours: z.number().min(0),
 			deadlineMinutes: z.number().min(0).max(60),
 			deadlineDate: z.date(),
-			title: z.string().min(1)
+			title: z.string().min(1),
+			repeat: z.number().min(0)
 		});
 
-		const result = schema.safeParse({ hours, minutes, deadlineHours, deadlineMinutes, deadlineDate: deadlineDate.toDate('Europe/London'), title });
+		const result = schema.safeParse({
+			hours,
+			minutes,
+			deadlineHours,
+			deadlineMinutes,
+			deadlineDate: deadlineDate.toDate('Europe/London'),
+			title,
+			repeat
+		});
 		if (!result.success) {
-            console.log(result.error.issues)
-            issues = result.error.issues.map(issue => `${issue.path[0]}: ${issue.message}`);
-            return
+			console.log(result.error.issues);
+			issues = result.error.issues.map((issue) => `${issue.path[0]}: ${issue.message}`);
+			return;
 		}
 
 		let duration = hours * 3600 + minutes * 60;
 		let deadline = deadlineDate.toDate('Europe/London');
 		deadline.setHours(deadlineHours);
 		deadline.setMinutes(deadlineMinutes);
-		task = { title, duration, deadline, id: task.id, scheduled: null };
+		task = {
+			title,
+			duration,
+			deadline,
+			repeat: repeat == 0 ? null : repeat,
+			id: task.id,
+			scheduled: null
+		};
 		callback(task);
 		open = false;
 	}
@@ -82,12 +99,17 @@
 				<NumericInput bind:value={deadlineHours} class="col-span-2" />
 				<NumericInput bind:value={deadlineMinutes} class="col-span-2" />
 			</div>
+			<div class="grid grid-cols-5 items-center gap-4">
+				<Label for="duration" class="text-right">Repeat</Label>
+				<NumericInput bind:value={repeat} class="col-span-2" />
+				<Label for="duration" class="col-span-2 text-left">Days</Label>
+			</div>
 		</div>
 		<Dialog.Footer>
 			<Button type="submit" on:click={submit}>Save</Button>
 		</Dialog.Footer>
-        {#each issues as issue}
-				<p class="text-red-500 text-right">{issue}</p>
-			{/each}
+		{#each issues as issue}
+			<p class="text-right text-red-500">{issue}</p>
+		{/each}
 	</Dialog.Content>
 </Dialog.Root>
