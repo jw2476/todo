@@ -6,12 +6,15 @@
 	import { onMount } from 'svelte';
 	import { formatDuration } from '$lib/date';
 	import { invalidateAll } from '$app/navigation';
+    import NumericInput from "$lib/components/NumericInput.svelte";
 
 	export let data;
 	let schedule: Array<ScheduledTask> = data.tasks;
 	$: schedule = data.tasks;
 	let current: ScheduledTask | undefined;
 	let next: Array<ScheduledTask> = [];
+        let breakHours: number = 0;
+        let breakMinutes: number = 0;
 
     setCurrent();
     setNext();
@@ -51,6 +54,15 @@
 		await fetch('/api/tasks', { method: 'DELETE', body: JSON.stringify({ id: current.id }) });
 		await invalidateAll();
 	}
+
+    async function takeBreak() {
+        let duration = breakHours * 3600 + breakMinutes * 60;
+        let deadline = new Date(Date.now() + duration * 1000);
+        let title = "Break";
+        await fetch("/api/tasks", { method: "POST", body: JSON.stringify({ duration, deadline, title }) }); 
+        await invalidateAll();
+    }
+
 </script>
 
 <div class="p-8 md:p-16 lg:mx-[15vw] lg:grid lg:grid-cols-3 lg:gap-4">
@@ -78,11 +90,15 @@
 				</Card.Header>
 			</Card.Root>
 		{/if}
-		<Button.Root class="p-16 text-3xl">Take a break</Button.Root>
+        <Card.Root class="p-8 grid grid-cols-3 gap-4"> 
+            <NumericInput bind:value={breakHours} />
+            <NumericInput bind:value={breakMinutes} />
+            <Button.Root class="text-xl" on:click={takeBreak}>Take a break</Button.Root>
+        </Card.Root>
 	</div>
 	<div class="hidden grid-rows-4 gap-4 lg:grid">
 		{#each next.slice(1, 4) as task}
-			<Task description={`Next in ${timeUntil(task)}`} {task} />
+        <Task description={`Next in ${timeUntil(task)}`} {task} />
 		{/each}
 	</div>
 </div>

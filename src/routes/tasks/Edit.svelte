@@ -7,7 +7,7 @@
 	import { parseDate, type DateValue, fromDate } from '@internationalized/date';
 	import DatePicker from './DatePicker.svelte';
 	import { z } from 'zod';
-	import NumericInput from './NumericInput.svelte';
+	import NumericInput from '$lib/components/NumericInput.svelte';
 
 	export let task: Task;
 	export let dialogTitle: string;
