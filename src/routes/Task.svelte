@@ -1,26 +1,26 @@
 <script lang="ts">
     import * as Card from "$lib/components/ui/card";
-	import type { ScheduledTask } from "$lib/schedule";
     import Clock from "svelte-radix/Clock.svelte";
     import Calendar from "svelte-radix/Calendar.svelte";
 	import { formatDuration } from "$lib/date";
+	import type { Task } from "$lib/types";
     
-    export let task: ScheduledTask;
+    export let task: Task;
     export let description: string;
     
     function duration(): string {
-        return formatDuration(task.task.duration);
+        return formatDuration(task.duration);
     }
 
     function deadline(): string {
-        const value = task.task.deadline;
+        const value = task.deadline;
         return `${value.getDate()}/${value.getMonth()}/${value.getFullYear()}`
     }
 </script>
 
 <Card.Root>
     <Card.Header>
-        <Card.Title class="text-center text-5xl">{task.task.title}</Card.Title>
+        <Card.Title class="text-center text-5xl">{task.title}</Card.Title>
         <Card.Description class="text-center">{description}</Card.Description>
     </Card.Header>
     <Card.Footer class="lg:px-16">

@@ -18,7 +18,5 @@ export async function load({ cookies }) {
         return error(tasks);
     }
 
-    const schedule = await generateSchedule(user, tasks);
-
-    return { schedule };
+    return { tasks };
 }

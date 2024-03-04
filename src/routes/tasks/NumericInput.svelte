@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { Input } from '$lib/components/ui/input';
+	import { onMount } from 'svelte';
 
 	let className: string | null | undefined = undefined;
 	export let value: number;
@@ -14,6 +15,10 @@
             value = parseInt(text);
         }
 	}
+
+    onMount(() => {
+        text = value.toString().padStart(2, "0");
+    });
 </script>
 
 <Input class={className} bind:value={text} on:input={check} />

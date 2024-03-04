@@ -5,6 +5,7 @@ import { db } from "$lib/db.js";
 import { eq } from "drizzle-orm";
 import { tasks, users } from "$lib/schema.js";
 import { getTasks, getUser } from "$lib/tasks.js";
+import { generateSchedule } from "$lib/schedule.js";
 
 export async function GET({ cookies }) {
     const token = cookies.get("token");
@@ -42,6 +43,13 @@ export async function POST({ request, cookies }) {
 
     const task = await db.insert(tasks).values({ deadline: deadlineDate, duration, title, user_id: user.id }).returning({ id: tasks.id });
 
+
+    const taskList = await getTasks(user);
+    if (typeof taskList === "number") {
+        return error(taskList);
+    }
+    await generateSchedule(user, taskList);
+
     return new Response(JSON.stringify({ id: task[0].id }));
 }
 
@@ -69,6 +77,12 @@ export async function DELETE({ request, cookies }) {
     }
 
     await db.delete(tasks).where(eq(tasks.id, id));
+
+    const taskList = await getTasks(user);
+    if (typeof taskList === "number") {
+        return error(taskList);
+    }
+    await generateSchedule(user, taskList);
 
     return new Response();
 }
@@ -99,6 +113,12 @@ export async function PATCH({ request, cookies }) {
     }
 
     await db.update(tasks).set({ deadline: deadlineDate, duration, title }).where(eq(tasks.id, id));
+
+    const taskList = await getTasks(user);
+    if (typeof taskList === "number") {
+        return error(taskList);
+    }
+    await generateSchedule(user, taskList);
 
     return new Response();
 }

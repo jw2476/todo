@@ -1,17 +1,20 @@
 <script lang="ts">
 	import * as Card from '$lib/components/ui/card';
 	import * as Button from '$lib/components/ui/button';
-	import type { ScheduledTask } from '$lib/schedule.js';
+	import type { Task as ScheduledTask } from '$lib/types';
 	import Task from './Task.svelte';
 	import { onMount } from 'svelte';
 	import { formatDuration } from '$lib/date';
-    import { invalidateAll } from "$app/navigation";
+	import { invalidateAll } from '$app/navigation';
 
 	export let data;
-	let schedule: Array<ScheduledTask> = data.schedule;
-    $: schedule = data.schedule;
+	let schedule: Array<ScheduledTask> = data.tasks;
+	$: schedule = data.tasks;
 	let current: ScheduledTask | undefined;
 	let next: Array<ScheduledTask> = [];
+
+    setCurrent();
+    setNext();
 
 	onMount(() => {
 		setInterval(setCurrent, 1000);
@@ -20,31 +23,34 @@
 
 	function setCurrent() {
 		current = schedule.find((task, a, b) => {
+			if (task.scheduled === null) {
+				return false;
+			}
 			let now = Date.now();
-			let start = task.start.getTime();
-			let end = task.start.getTime() + task.task.duration * 1000;
+			let start = task.scheduled.getTime();
+			let end = task.scheduled.getTime() + task.duration * 1000;
 			return start <= now && now <= end;
 		});
-		console.log(current);
 	}
 
 	function setNext() {
 		next = schedule
-			.sort((a, b) => a.start.getTime() - b.start.getTime())
-			.filter((task) => task.start.getTime() > Date.now());
+			.filter(task => task.scheduled && task.scheduled.getTime() > Date.now())
+			.sort((a, b) => a.scheduled?.getTime() - b.scheduled?.getTime());
 		console.log(next);
 	}
 
 	function timeUntil(task: ScheduledTask): string {
-        let between = task.start.getTime() - Date.now();
-        return formatDuration(between / 1000);
-    }
+        if (task.scheduled === null) { return "Unscheduled"; }
+        let between = task.scheduled.getTime() - Date.now();
+		return formatDuration(between / 1000);
+	}
 
-    async function complete() {
-        if (current == undefined) return;
-        await fetch("/api/tasks", { method: "DELETE", body: JSON.stringify({ id: current.task.id }) });
-        await invalidateAll();
-    }
+	async function complete() {
+		if (current == undefined) return;
+		await fetch('/api/tasks', { method: 'DELETE', body: JSON.stringify({ id: current.id }) });
+		await invalidateAll();
+	}
 </script>
 
 <div class="p-8 md:p-16 lg:mx-[15vw] lg:grid lg:grid-cols-3 lg:gap-4">
@@ -59,7 +65,8 @@
 			</Card.Root>
 		{/if}
 		<div class="grid gap-4 max-lg:grid-rows-2 lg:grid-cols-2">
-			<Button.Root class="p-8 text-xl lg:p-16 lg:text-3xl" on:click={complete}>Complete</Button.Root>
+			<Button.Root class="p-8 text-xl lg:p-16 lg:text-3xl" on:click={complete}>Complete</Button.Root
+			>
 			<Button.Root class="p-8 text-xl lg:p-16 lg:text-3xl">Snooze</Button.Root>
 		</div>
 		{#if next[0]}
@@ -74,9 +81,8 @@
 		<Button.Root class="p-16 text-3xl">Take a break</Button.Root>
 	</div>
 	<div class="hidden grid-rows-4 gap-4 lg:grid">
-        {#each next.slice(1, 4) as task}
-            
-		<Task description={`Next in ${timeUntil(task)}`} task={task} />
-        {/each}
+		{#each next.slice(1, 4) as task}
+			<Task description={`Next in ${timeUntil(task)}`} {task} />
+		{/each}
 	</div>
 </div>

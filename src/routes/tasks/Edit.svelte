@@ -20,12 +20,12 @@
 
 	function start() {
 		title = task.title;
-		hours = task.duration / 3600;
-		minutes = (task.duration % 3600) / 60;
+		hours = Math.floor(task.duration / 3600);
+		minutes = Math.floor((task.duration % 3600) / 60);
 		deadlineDate = fromDate(task.deadline, 'Europe/London');
 		deadlineHours = task.deadline.getHours();
 		deadlineMinutes = task.deadline.getMinutes();
-		console.log(deadlineDate);
+		console.log(hours);
 	}
 
 	async function submit() {
@@ -49,7 +49,7 @@
 		let deadline = deadlineDate.toDate('Europe/London');
 		deadline.setHours(deadlineHours);
 		deadline.setMinutes(deadlineMinutes);
-		task = { title, duration, deadline, id: task.id };
+		task = { title, duration, deadline, id: task.id, scheduled: null };
 		callback(task);
 		open = false;
 	}
