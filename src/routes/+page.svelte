@@ -76,6 +76,22 @@
         await sleep(500);
 		await invalidateAll();
 	}
+
+    async function snooze() {
+        if (!current) { return; }
+        current.startAfter = new Date(current.startAfter.getTime() + (3600 * 1000));
+        const body = {
+            startAfter: current.startAfter.getTime(),
+			deadline: current.deadline.getTime(),
+			duration: current.duration,
+			title: current.title,
+			id: current.id,
+			repeat: current.repeat
+		};
+		await fetch('/api/tasks', { method: 'PATCH', body: JSON.stringify(body) });
+        await sleep(500);
+		await invalidateAll();
+    }
 </script>
 
 <div class="p-8 md:p-16 lg:mx-[15vw] lg:grid lg:grid-cols-3 lg:gap-4">
@@ -92,7 +108,7 @@
 		<div class="grid gap-4 max-lg:grid-rows-2 lg:grid-cols-2">
 			<Button.Root class="p-8 text-xl lg:p-16 lg:text-3xl" on:click={complete}>Complete</Button.Root
 			>
-			<Button.Root class="p-8 text-xl lg:p-16 lg:text-3xl">Snooze</Button.Root>
+			<Button.Root class="p-8 text-xl lg:p-16 lg:text-3xl" on:click={snooze}>Snooze</Button.Root>
 		</div>
 		{#if next[0]}
 			<Task description={timeUntil(next[0])} task={next[0]} />
